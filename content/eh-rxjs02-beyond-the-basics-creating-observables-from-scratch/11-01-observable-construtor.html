@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Name Required</title>
+  <style type="text/less">
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      padding-top:100px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app"></div>
+  <script src="http://localhost:9091/less/less-v2.7.2.min.js"></script>
+  <script src="http://localhost:9091/lodash/lodash-4.17.10.min.js"></script>
+  <script src="http://localhost:9091/rxjs/rxjs-v5.5.12.js"></script>
+
+  <script src="http://localhost:9091/babel/babel-standalone-v7.0.0-alpha.20.min.js"></script>
+  <script src="http://localhost:9091/babel/babel-polyfill-v7.0.0-alpha.20.min.js"></script>
+
+  <script>
+    console.log( `
+      _: version ${_.VERSION} </br>
+      less: version ${less.version} </br>
+    `);
+  </script>
+
+  <script type="text/babel" >
+
+    const bar_ = Rx.Observable.create(obs=>{
+      obs.next(1)
+      obs.next(2)
+      obs.next(3)
+      obs.complete()
+    })
+
+    // The above is same as the following:
+    // The Constructor syntax:
+
+    const bar = new Rx.Observable(obs=>{
+      obs.next(1)
+      obs.next(2)
+      obs.next(3)
+      obs.complete()
+    })
+
+
+    bar.subscribe(
+      function nextValueHanler(v) {
+        console.log('next: ', v)
+      },
+      function errorHandler(e) {
+        console.log('error: ', e)
+      },
+      function completHandler(v) {
+        console.log('done')
+      }
+    )
+
+    // The above is same as the following:
+    // bar.subscribe() actually convert the 3 functions
+    // into an objects with the functions as key-value pairs
+
+    bar.subscribe(
+      {
+        next: function nextValueHanler(v) {
+          console.log('next: ', v)
+        },
+        error: function errorHandler(e) {
+          console.log('error: ', e)
+        },
+        complete: function completHandler(v) {
+          console.log('done')
+        }
+      }
+    )
+
+  </script>
+</body>
+
+</html>
