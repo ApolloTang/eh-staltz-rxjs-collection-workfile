@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Name Required</title>
+  <style type="text/less">
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      padding-top:100px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app"></div>
+  <script src="http://localhost:9091/less/less-v2.7.2.min.js"></script>
+  <script src="http://localhost:9091/lodash/lodash-4.17.10.min.js"></script>
+  <script src="http://localhost:9091/rxjs/rxjs-v5.5.12.js"></script>
+
+  <script src="http://localhost:9091/babel/babel-standalone-v7.0.0-alpha.20.min.js"></script>
+  <script src="http://localhost:9091/babel/babel-polyfill-v7.0.0-alpha.20.min.js"></script>
+
+  <script>
+    console.log( `
+      _: version ${_.VERSION} </br>
+      less: version ${less.version} </br>
+    `);
+  </script>
+
+  <script type="text/babel" >
+
+    const observable = Rx.Observable.interval(1000)
+      .take(5).map(v=>Date.now().toString().substring(10))
+
+
+    const observerA = {
+      next: (v) => { console.log('A next:  ', v) },
+      error: (e) => {},
+      complete: () =>  { console.log('A done') }
+    }
+
+    const observerB = {
+      next: (v) => { console.log(' --- B next:  ', v ) },
+      error: (e) => {},
+      complete: () =>  { console.log(' --- B done') }
+    }
+
+
+    const observable_bridge = {
+      observers: [],
+      subscribe: function(obs) {this.observers.push(obs)},
+      next: function(v) { this.observers.forEach(o=>o.next(v)) },
+      error: function(e) { this.observers.forEach(o=>o.error(e))},
+      complete: function() { this.observers.forEach(o=>o.complete()) }
+    }
+
+    observable_bridge.subscribe(observerA)
+
+    setTimeout(()=>{
+      observable_bridge.subscribe(observerB)
+    }, 3000)
+
+    observable.subscribe(observable_bridge);
+
+  </script>
+</body>
+
+</html>

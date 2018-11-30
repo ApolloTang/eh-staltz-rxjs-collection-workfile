@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Name Required</title>
+  <style type="text/less">
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      padding-top:100px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app"></div>
+  <script src="http://localhost:9091/less/less-v2.7.2.min.js"></script>
+  <script src="http://localhost:9091/lodash/lodash-4.17.10.min.js"></script>
+  <script src="http://localhost:9091/rxjs/rxjs-v5.5.12.js"></script>
+
+  <script src="http://localhost:9091/babel/babel-standalone-v7.0.0-alpha.20.min.js"></script>
+  <script src="http://localhost:9091/babel/babel-polyfill-v7.0.0-alpha.20.min.js"></script>
+
+  <script>
+    console.log( `
+      _: version ${_.VERSION} </br>
+      less: version ${less.version} </br>
+    `);
+  </script>
+
+  <script type="text/babel" >
+
+    const observable = Rx.Observable.interval(1000)
+      .take(5).map(v=>Date.now().toString().substring(10))
+
+
+    // What if we want some thing like
+    // one executions but two observers AA and BB
+    // so that both observer get the same value for the event ?
+    const observerAA = {
+      next: (v) => {
+        console.log('AA next:  ', v)
+        observerBB.next(v) // <--- observerBB is run when observerAA run
+      },
+      error: (e) => { console.log('AA error: ', e) },
+      complete: () =>  {
+        console.log('AA done')
+        observerBB.complete() // <-- observerBB complete when observerBB complete
+      }
+    }
+
+    observable.subscribe(observerAA); // <-- only want one execution
+
+    const observerBB = {
+      next: (v) => { console.log(' --- BB next:  ', v) },
+      error: (e) => { console.log(' --- BB error: ', e) },
+      complete: () =>  { console.log(' --- BB done') }
+    }
+    // observable.subscribe(observerB); // <--- we don't want two execution
+
+
+    // Nice solution, but we can not start observerBB at a different time
+    // They can only able to run together
+
+  </script>
+</body>
+
+</html>
