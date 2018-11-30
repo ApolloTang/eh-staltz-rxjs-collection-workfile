@@ -30,19 +30,31 @@
 
   <script type="text/babel" >
 
-    const observable = Rx.Observable.interval(1000).take(5)
+    const observable = Rx.Observable.interval(1000)
+      .take(5).map(v=>Date.now().toString().substring(10))
+
 
     const observerA = {
-      next: function nextValueHanler(v) { console.log('next: ', v) },
-      error: function errorHandler(e) { console.log('error: ', e) },
-      complete: function completHandler(v) { console.log('done') }
+      next: (v) => { console.log('A next:  ', v) },
+      error: (e) => {},
+      complete: () =>  { console.log('A done') }
     }
 
-    const subscription = observable.subscribe(observerA)
+    const observerB = {
+      next: (v) => { console.log(' --- B next:  ', v ) },
+      error: (e) => {},
+      complete: () =>  { console.log(' --- B done') }
+    }
 
-    setTimeout( ()=>{
-    }, 5000)
+    const subject = new Rx.Subject();
 
+    subject.subscribe(observerA)
+
+    setTimeout(()=>{
+      subject.subscribe(observerB)
+    }, 3000)
+
+    observable.subscribe(subject);
 
   </script>
 </body>
