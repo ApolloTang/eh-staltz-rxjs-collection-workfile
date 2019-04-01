@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Name Required</title>
+  <style type="text/less">
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      padding-top:100px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app"></div>
+  <script src="http://localhost:9091/less/less-v2.7.2.min.js"></script>
+  <script src="http://localhost:9091/lodash/lodash-4.17.10.min.js"></script>
+  <script src="http://localhost:9091/rxjs/rxjs-v5.5.12.js"></script>
+
+  <script src="http://localhost:9091/babel/babel-polyfill-latest.js"></script>
+  <script src="http://localhost:9091/babel/babel-standalone-latest.min.js"></script>
+
+  <script>
+    console.log('_:'+_.VERSION)
+    console.log('less:'+less.version)
+  </script>
+
+  <script type="text/babel" >
+
+    const foo$ = Rx.Observable.of(1,2,3,4,5)
+
+    // function multiplyByTen$( source$ ) {
+    function multiplyByTen$() {
+      const source$ = this
+        // foo$ is the instance of Rx.Obsservable.of()
+        // and is pass to source$; thus:
+        // foo$ === source$ ==== this
+
+      const result$ = Rx.Observable.create( function subscribe( observer ){
+        source$.subscribe(
+          function next(x) { observer.next( x*10 ) },
+          function error(err) { console.log(err) },
+          function complete() { console.log('done Rx.Observable.of(1,2,3,4,5) ') }
+        )
+      })
+
+      return result$
+    }
+    Rx.Observable.prototype.multiplyByTen = multiplyByTen$
+      // monkey patch
+      // don't do the above in production, illustration only
+
+
+    // multiplyByTen$(foo$).subscribe(
+    foo$.multiplyByTen().subscribe(  //// <----- now we can chain operator
+      function next(result) { console.log(result)},
+      function error(err) { console.log(err) },
+      function complete() { console.log('done') }
+    )
+
+  </script>
+</body>
+
+</html>

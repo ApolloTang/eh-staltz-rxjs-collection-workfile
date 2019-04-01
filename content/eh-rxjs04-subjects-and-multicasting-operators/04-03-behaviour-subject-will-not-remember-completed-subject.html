@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Name Required</title>
+  <style type="text/less">
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      padding-top:100px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app"></div>
+  <script src="http://localhost:9091/less/less-v2.7.2.min.js"></script>
+  <script src="http://localhost:9091/lodash/lodash-4.17.10.min.js"></script>
+  <script src="http://localhost:9091/rxjs/rxjs-v5.5.12.js"></script>
+
+  <script src="http://localhost:9091/babel/babel-polyfill-latest.js"></script>
+  <script src="http://localhost:9091/babel/babel-standalone-latest.min.js"></script>
+
+  <script>
+    console.log('_:'+_.VERSION)
+    console.log('less:'+less.version)
+  </script>
+
+  <script type="text/babel" >
+
+    const seed = 0  // initial value
+    const subject = new Rx.BehaviorSubject(seed)
+
+    const observerA = {
+      next: (v) => { console.log('A next:  ', v) },
+      error: (e) => {},
+      complete: () =>  { console.log('A done') }
+    }
+
+    const observerB = {
+      next: (v) => { console.log(' --- B next:  ', v ) },
+      error: (e) => {},
+      complete: () =>  { console.log(' --- B done') }
+    }
+
+    subject.subscribe(observerA)
+    console.log('==== observerA subscribed')
+
+    subject.next(1)
+    subject.next(2)
+    subject.next(3) // the last value emmited before observerB subscribed
+    subject.complete() // <------ completed
+
+    setTimeout(()=>{
+      subject.subscribe(observerB)
+      console.log('==== observerB subscribed (too late, events has already occurs)')
+    }, 2000)
+
+    /*
+      ------1---2---3---|
+    A O.....1...2...3...
+    B                      ............ (B see no value b/c event has completed)
+
+    */
+
+  </script>
+</body>
+
+</html>
