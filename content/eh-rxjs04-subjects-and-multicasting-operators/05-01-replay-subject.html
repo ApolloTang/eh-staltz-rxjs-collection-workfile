@@ -30,6 +30,7 @@
 
     const bufferSize = 2 // <--- this will replay last two events
     // const bufferSize = Number.POSITIVE_INFINITY /// <--- this will replay all the history
+
     const subject = new Rx.ReplaySubject(bufferSize)
 
     const observerA = {

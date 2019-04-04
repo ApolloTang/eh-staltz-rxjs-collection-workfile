@@ -28,9 +28,6 @@
 
   <script type="text/babel" >
 
-    const seed = 0  // initial value
-    const subject = new Rx.BehaviorSubject(seed)
-
     const observerA = {
       next: (v) => { console.log('A next:  ', v) },
       error: (e) => {},
@@ -43,29 +40,27 @@
       complete: () =>  { console.log(' --- B done') }
     }
 
-    subject.subscribe(observerA)
+    const connectableObservable = Rx.Observable
+      .interval(1000)//.take(5)
+      .do(x=>console.log('source: ', x))
+      .multicast(new Rx.Subject())
+
+
+    const subConnect = connectableObservable.connect() // start shared execution
+
+    connectableObservable.subscribe(observerA)
     console.log('==== observerA subscribed')
 
-    subject.next(1)
-    subject.next(2)
-    subject.next(3) // the last value emmited before observerB subscribed
-    subject.complete() // <------ completed
 
     setTimeout(()=>{
-      subject.subscribe(observerB)
-      console.log('==== observerB subscribed (too late, events has already occurs)')
-    }, 2000)
+      connectableObservable.subscribe(observerB)
+      console.log('==== observerB subscribed')
+    }, 4000)
 
-    /*
-
-     seed              subject has completed
-      |                 |
-      v                 v
-      0-----1---2---3---|
-    A 0.....1...2...3...|
-    B                     | (B see no value b/c event has completed)
-
-    */
+    setTimeout(()=>{
+      subConnect.unsubscribe()
+      console.log('==== unsubscribed shared execution')
+    }, 6000)
 
   </script>
 </body>

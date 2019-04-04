@@ -28,9 +28,6 @@
 
   <script type="text/babel" >
 
-    const seed = 0  // initial value
-    const subject = new Rx.BehaviorSubject(seed)
-
     const observerA = {
       next: (v) => { console.log('A next:  ', v) },
       error: (e) => {},
@@ -43,28 +40,32 @@
       complete: () =>  { console.log(' --- B done') }
     }
 
+
+
+    const bufferSize = 1
+    const subject = new Rx.ReplaySubject(bufferSize)
+
     subject.subscribe(observerA)
     console.log('==== observerA subscribed')
 
-    subject.next(1)
-    subject.next(2)
-    subject.next(3) // the last value emmited before observerB subscribed
-    subject.complete() // <------ completed
+    // setTimeout(()=>subject.next(1), 1000)
+    // setTimeout(()=>subject.next(2), 2000)
+    // setTimeout(()=>subject.next(3), 3000)
 
     setTimeout(()=>{
       subject.subscribe(observerB)
-      console.log('==== observerB subscribed (too late, events has already occurs)')
-    }, 2000)
+      console.log('==== observerB subscribed')
+    }, 4000)
 
     /*
+      ------------------------------->>> ReplaySubject(bufferSize=1)
+    A ...............................
+    B                 ............ (B see the last one value, there's none)
+          ^   ^   ^   ^
+                      |
+                      B subscribe here at the 400th ms
 
-     seed              subject has completed
-      |                 |
-      v                 v
-      0-----1---2---3---|
-    A 0.....1...2...3...|
-    B                     | (B see no value b/c event has completed)
-
+      each tick '-' is 250 ms, each ^ is 1000ms
     */
 
   </script>
