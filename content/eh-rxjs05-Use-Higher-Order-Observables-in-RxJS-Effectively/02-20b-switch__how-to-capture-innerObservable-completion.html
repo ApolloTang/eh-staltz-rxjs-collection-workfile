@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Name Required</title>
+  <style type="text/less">
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      padding-top:100px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app"></div>
+  <script src="http://localhost:9091/less/less-v2.7.2.min.js"></script>
+  <script src="http://localhost:9091/lodash/lodash-4.17.10.min.js"></script>
+  <script src="http://localhost:9091/rxjs/rxjs-v5.5.12.js"></script>
+
+  <script src="http://localhost:9091/babel/babel-polyfill-latest.js"></script>
+  <script src="http://localhost:9091/babel/babel-standalone-latest.min.js"></script>
+
+  <script>
+    console.log('_:'+_.VERSION)
+    console.log('less:'+less.version)
+  </script>
+
+  <script type="text/babel" >
+
+    let ref_innerObservable_subscription = null
+
+
+    const firstOrder = Rx.Observable
+      .fromEvent(document, 'click')
+
+    const secondOrder = firstOrder
+      .map( click => {
+        console.log('click, unsubscribe previous innerObservable')
+        if (ref_innerObservable_subscription !== null) {
+          ref_innerObservable_subscription.unsubscribe()
+        }
+        const innerObservable = Rx.Observable.interval(500).take(5)
+        return innerObservable
+      })
+
+    const observer = {
+      next: innerObservable => {
+        const innerObserver = {
+          next: tick=>console.log(tick),
+          error: err=>{},
+          complete: ()=>console.log('innerObservable complete')
+        }
+        ref_innerObservable_subscription = innerObservable.subscribe(innerObserver)
+      },
+      error: err=>{} ,
+      complete: () => {console.log('complete')} /// this never called
+    }
+
+    secondOrder.subscribe( observer )
+
+  </script>
+</body>
+
+</html>
