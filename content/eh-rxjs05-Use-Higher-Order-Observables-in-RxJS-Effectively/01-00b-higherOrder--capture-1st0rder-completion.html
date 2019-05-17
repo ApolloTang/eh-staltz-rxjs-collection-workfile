@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Name Required</title>
+  <style type="text/less">
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      padding-top:100px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app"></div>
+  <script src="http://localhost:9091/less/less-v2.7.2.min.js"></script>
+  <script src="http://localhost:9091/lodash/lodash-4.17.10.min.js"></script>
+  <script src="http://localhost:9091/rxjs/rxjs-v5.5.12.js"></script>
+
+  <script src="http://localhost:9091/babel/babel-polyfill-latest.js"></script>
+  <script src="http://localhost:9091/babel/babel-standalone-latest.min.js"></script>
+
+  <script>
+    console.log('_:'+_.VERSION)
+    console.log('less:'+less.version)
+  </script>
+
+  <script type="text/babel" >
+
+/*
+
+-----0-----1-----2-----3-----4|      firstOrder$
+     map
+     |     |     |     |     |
+     |     |     |     |     40$|    Rx.Observable.of(40)
+     |     |     |     30$|          Rx.Observable.of(30)
+     |     |     20$|                Rx.Observable.of(20)
+     |     10$|                      Rx.Observable.of(10)
+     0$|                             Rx.Observable.of(0)
+
+-----0$|---10$|--20$|--30$|--40$|    secondORder$
+
+*/
+
+    // the 'next' value of fristOrder$ are premitive value: next(firstOrder$value)
+    // firstOrder$value: (0,1,2,3,4)
+    const firstOrder$  = Rx.Observable.create(observer=>{
+      observer.next(0)
+      observer.next(1)
+      observer.next(2)
+      observer.next(3)
+      observer.next(4)
+      observer.complete() // 1stOrd$ done
+    })
+
+
+    // the 'next' value of secondOrder$ is an Observable: next(innerObs$)
+    const secondOrder$ = Rx.Observable.create(observer2nd=>{
+      firstOrder$.subscribe({
+        next: firstOrder$value=>{
+          const innerObs$value = firstOrder$value*10
+          const innerObs$ = Rx.Observable.of(innerObs$value) // note that of() will emit completion on each value
+          observer2nd.next(innerObs$)
+        },
+        error: e=>{},
+        complete: ()=>{
+          console.log('1stOrd$ done')
+          observer2nd.complete() // 2ndOrd done
+       }
+      })
+    })
+
+    secondOrder$.subscribe({
+      next: innerObs$=>{
+        innerObs$.subscribe({
+          next: innerObs$value=>console.log('innerObs$value: ', innerObs$value),
+          error: e=>{},
+          complete: ()=>console.log('Rx.Observable.of(x*10) done')
+        })
+      },
+      error: e=>{},
+      complete: ()=>{ console.log('2ndOrd done') }
+    })
+
+  </script>
+</body>
+
+</html>

@@ -28,37 +28,20 @@
 
   <script type="text/babel" >
 
-    const observer_HO = {
-      next: (observable) => {
+    const click$ = Rx.Observable.fromEvent(document, 'click')
 
-        const observerB = {
-          next: (v) => { console.log('B next:  ', v, typeof v) },
-          error: (e) => {},
-          complete: () =>  { console.log('B done') }
-        }
-
-        observable.subscribe(observerB)
-
-      },
-      error: (e) => {},
-      complete: () =>  { console.log('HO done') }
-    }
-
-    const myObservable = Rx.Observable
-      .interval(1000).take(5)
-
-    const higherOrderObservable = myObservable
-      .map( x=> {
-        const innerObservable = Rx.Observable.create(
-          observer => {
-            observer.next(x+'')
-            observer.complete()
-          }
-        )
-        return innerObservable
+    const hoObs$ = click$
+      .map( click => {
+        console.log('click');
+        return Rx.Observable.interval(1000).take(5)
       })
+      .concatAll()
 
-    higherOrderObservable.subscribe(observer_HO)
+    hoObs$.subscribe({
+      next: tick=>console.log(tick),
+      error: (e)=>{},
+      complete: () => { console.log('complete')}
+    })
 
   </script>
 </body>

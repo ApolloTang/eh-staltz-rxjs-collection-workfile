@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Name Required</title>
+  <style type="text/less">
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      padding-top:100px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app"></div>
+  <script src="http://localhost:9091/less/less-v2.7.2.min.js"></script>
+  <script src="http://localhost:9091/lodash/lodash-4.17.10.min.js"></script>
+  <script src="http://localhost:9091/rxjs/rxjs-v5.5.12.js"></script>
+
+  <script src="http://localhost:9091/babel/babel-polyfill-latest.js"></script>
+  <script src="http://localhost:9091/babel/babel-standalone-latest.min.js"></script>
+
+  <script>
+    console.log('_:'+_.VERSION)
+    console.log('less:'+less.version)
+  </script>
+
+  <script type="text/babel" >
+
+    const click$ = Rx.Observable.fromEvent(document, 'click')
+
+    const hoObs$ = click$
+      .map( click => {
+        console.log('click');
+        return Rx.Observable.interval(1000).take(5)
+      })
+      .mergeAll(2)
+
+    hoObs$.subscribe({
+      next: tick=>console.log(tick),
+      error: (e)=>{},
+      complete: () => { console.log('complete')}
+    })
+
+
+    /*
+         click   click  click
+    -----+-------+------+--------------------------> click$
+         |       |      |
+         |       |      0----1----2----3----4----5|  inner Observable 3
+         |       |
+         |       0----1----2---3----4----5|        inner Observable 2
+         |
+         0----1----2----3----4----5|               inner Observable 1
+
+         mergeAll()
+
+    -----0---1---0-2--1-3--2-4-3--5-4----51---2----3----4----5-------> hoObs$
+                                          ^
+                                          |
+                                          here inner Observable 3 start
+                                          b/c only two inner Observable are allowed
+    * */
+
+  </script>
+</body>
+
+</html>

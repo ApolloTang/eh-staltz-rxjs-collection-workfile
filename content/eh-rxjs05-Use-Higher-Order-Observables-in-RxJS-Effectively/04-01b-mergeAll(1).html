@@ -27,28 +27,21 @@
   </script>
 
   <script type="text/babel" >
-    let count = 0
 
-    const clickObservable = Rx.Observable
-      .fromEvent(document, 'click')
+    const click$ = Rx.Observable.fromEvent(document, 'click')
 
-
-
-    const clockObservable = clickObservable
+    const hoObs$ = click$
       .map( click => {
-        console.log('click')
-        return Rx.Observable.interval(1000).take(5).map(x=>count+' '+x)
+        console.log('click');
+        return Rx.Observable.interval(1000).take(5)
       })
-      .mergeAll()
+      .mergeAll(1)
 
-    const observer = {
-      next:
-         tick=>console.log(tick)
-       , error: (e)=>{}
-       , complete: () => { console.log('complete')}
-    }
-
-    clockObservable.subscribe( observer )
+    hoObs$.subscribe({
+      next: tick=>console.log(tick),
+      error: (e)=>{},
+      complete: () => { console.log('complete')}
+    })
 
   </script>
 </body>

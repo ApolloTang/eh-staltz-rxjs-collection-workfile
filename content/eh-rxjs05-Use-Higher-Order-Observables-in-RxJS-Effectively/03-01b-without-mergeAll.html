@@ -28,29 +28,20 @@
 
   <script type="text/babel" >
 
-    const observer_HO = {
-      next: (observable) => {
+    const click$ = Rx.Observable.fromEvent(document, 'click')
 
-        const observerB = {
-          next: (v) => { console.log('B next:  ', v, typeof v) },
-          error: (e) => {},
-          complete: () =>  { console.log('B done') }
-        }
+    const hoObs$ = clickObservable$
+      .map( click => {
+        console.log('click');
+        return Rx.Observable.interval(1000).take(5)
+      })
+      // .mergeAll()
 
-        observable.subscribe(observerB)
-
-      },
-      error: (e) => {},
-      complete: () =>  { console.log('HO done') }
-    }
-
-    const myObservable = Rx.Observable
-      .interval(1000).take(5)
-
-    const higherOrderObservable = myObservable
-      .map( x=> Rx.Observable.of(x+'') )
-
-    higherOrderObservable.subscribe(observer_HO)
+    hoObs$.subscribe({
+      next: tick$=>tick$.subscribe(tick=>console.log(tick)), // without mergeAll(), you have to subscribe
+      error: (e)=>{},
+      complete: () => { console.log('complete')}
+    })
 
   </script>
 </body>
