@@ -28,33 +28,28 @@
 
   <script type="text/babel" >
 
-    const clickObservable = Rx.Observable
-      .fromEvent(document, 'click')
+    let prevSub = null
 
-    let ref_clockObservableSub = null
+    const click$ = Rx.Observable.fromEvent(document, 'click')
 
-    const clockObservable = clickObservable
-      .map( click => {
-        console.log('click, unsubscribe previous clockObservable')
-        if (ref_clockObservableSub !== null) {
-          ref_clockObservableSub.unsubscribe()
-        }
-        const innerObservable = Rx.Observable.interval(1000)
-        return innerObservable
+    const clock$$ = click$
+      .map( () => {
+        console.log('clicked, unsubscribe previous inner$'),
+        prevSub && prevSub.unsubscribe()
+        const inner$ = Rx.Observable.interval(1000)
+        return inner$
       })
 
-    const observer = {
-      next:
-        innerObservable => {
-          ref_clockObservableSub = innerObservable.subscribe(
-              tick=>console.log(tick)
-          )
-        }
-       , error: (e)=>{}
-       , complete: () => { console.log('complete')}
-    }
+    // const clock$ = clock$$.switch() // switch flatten the inner
+                                       // observable and make it first order
 
-    clockObservable.subscribe( observer )
+    clock$$.subscribe( {
+      next: inner$ => { prevSub = inner$.subscribe( innerValue => console.log(innerValue)) },
+      error: e => {},
+      complete: () => console.log('click  complete') // this will
+                                                     // never complete b/c
+                                                     // click is still listening
+    })
 
   </script>
 </body>
