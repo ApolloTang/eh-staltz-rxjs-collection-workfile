@@ -30,7 +30,7 @@
 
     const click$ = Rx.Observable.fromEvent(document, 'click')
 
-    const sleep = (ms=1000) =>new Promise( rs=>setTimeout(()=>rs('done'), ms))
+    const sleep = (ms=1000) =>new Promise( rs=>setTimeout(()=>rs('wake'), ms))
 
     const wake$ = click$
      .map( ()=>Rx.Observable.fromPromise( sleep()) )
@@ -47,13 +47,13 @@
          click1
     -----+--+-------------------------------> click$
          |  |
-         |  +----d2|        inner Observable 2
+         |  +----w2|        inner Observable 2
          |
-         +----d1|           inner Observable 1
+         +----w1|           inner Observable 1
 
          switchMap()
 
-    -----.--.----d2-------------------------> clock$
+    -----.--.----w2-------------------------> wake$
             ^
             |
             first promise is canceled
