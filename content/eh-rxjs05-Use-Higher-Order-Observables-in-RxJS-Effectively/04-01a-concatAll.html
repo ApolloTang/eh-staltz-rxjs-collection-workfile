@@ -30,14 +30,15 @@
 
     const click$ = Rx.Observable.fromEvent(document, 'click')
 
-    const hoObs$ = click$
+    const clock$$ = click$
       .map( click => {
         console.log('click');
         return Rx.Observable.interval(1000).take(5)
       })
-      .concatAll()
 
-    hoObs$.subscribe({
+    const clock$ =  clock$$.concatAll()
+
+    clock$.subscribe({
       next: tick=>console.log(tick),
       error: (e)=>{},
       complete: () => { console.log('complete')}
