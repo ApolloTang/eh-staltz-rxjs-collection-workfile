@@ -28,23 +28,19 @@
 
   <script type="text/babel" >
 
-    const firstOrder = Rx.Observable
-      .fromEvent(document, 'click')
+    const click$ = Rx.Observable.fromEvent(document, 'click')
 
-    const secondOrder = firstOrder
-      .map( click => Rx.Observable.interval(500).take(5) )
+    const ticks$$ = click$
+      .map( () => Rx.Observable.interval(500).take(5) )
+    const ticks$ = ticks$$.switch()
 
-    const flatten_to_firstOrder = secondOrder.switch()
+    // ticks$$< click$<clickEvent> > ---> ticks$<number>
 
-    // SecondOrder< FirstOrder_1<clickEvent> > ---> FirstOrder_2<number>
-
-    const observer = {
+    ticks$.subscribe( {
       next: tick=>console.log(tick),
-      error: (e)=>{},
-      complete: () => { console.log('complete')}
-    }
-
-    flatten_to_firstOrder.subscribe( observer )
+      error: e=>{},
+      complete: () => console.log('complete')
+    } )
 
 
   </script>
