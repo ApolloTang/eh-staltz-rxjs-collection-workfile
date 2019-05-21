@@ -30,17 +30,20 @@
 
     const click$ = Rx.Observable.fromEvent(document, 'click')
 
-    const hoObs$ = clickObservable$
+    const clock$$ = click$
       .map( click => {
         console.log('click');
         return Rx.Observable.interval(1000).take(5)
       })
-      // .mergeAll()
 
-    hoObs$.subscribe({
+    // const clock$ = clock$$.mergeAll()
+
+    clock$$.subscribe({
       next: tick$=>tick$.subscribe(tick=>console.log(tick)), // without mergeAll(), you have to subscribe
-      error: (e)=>{},
-      complete: () => { console.log('complete')}
+      error: e=>{},
+      complete: () => { console.log('complete')} // This never call,
+                                                 // b/c click$ is
+                                                 // still listening
     })
 
   </script>
