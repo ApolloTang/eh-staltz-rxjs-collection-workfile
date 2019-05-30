@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Name Required</title>
+  <style type="text/less">
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      padding-top:100px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app"></div>
+  <script src="http://localhost:9091/less/less-v2.7.2.min.js"></script>
+  <script src="http://localhost:9091/lodash/lodash-4.17.10.min.js"></script>
+  <script src="http://localhost:9091/rxjs/rxjs-v5.5.12.js"></script>
+
+  <script src="http://localhost:9091/babel/babel-polyfill-latest.js"></script>
+  <script src="http://localhost:9091/babel/babel-standalone-latest.min.js"></script>
+
+  <script>
+    console.log('_:'+_.VERSION)
+    console.log('less:'+less.version)
+  </script>
+
+  <script type="text/babel" >
+
+    const click$ = Rx.Observable.fromEvent(document, 'click')
+
+    const sleep = (ms=1000) =>new Promise( rs=>setTimeout(()=>rs('wake'), ms))
+
+    const wake$ = click$
+     .switchMap(
+       ()=>sleep()
+     )
+
+    wake$.subscribe( {
+      next: v=>console.log(v),
+      error: e=>{},
+      complete: () => console.log('complete')
+    } )
+
+    /*
+            click2
+         click1
+    -----+--+-------------------------------> click$
+         |  |
+         |  +----w2|        inner Observable 2
+         |
+         +----w1|           inner Observable 1
+
+         switchMap()
+
+    -----.--.----w2-------------------------> wake$
+            ^
+            |
+            first promise is canceled
+    */
+
+  </script>
+</body>
+
+</html>
