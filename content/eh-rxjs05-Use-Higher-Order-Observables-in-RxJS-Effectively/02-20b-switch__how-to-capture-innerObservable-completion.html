@@ -28,36 +28,36 @@
 
   <script type="text/babel" >
 
-    let ref_innerObservable_subscription = null
+    let prevInnerObservable_subscription = null
 
+    const firstOrder$ = Rx.Observable
+      .fromEvent(document, 'click').take(4)
 
-    const firstOrder = Rx.Observable
-      .fromEvent(document, 'click')
-
-    const secondOrder = firstOrder
+    const secondOrder$$ = firstOrder$
       .map( click => {
-        console.log('click, unsubscribe previous innerObservable')
-        if (ref_innerObservable_subscription !== null) {
-          ref_innerObservable_subscription.unsubscribe()
-        }
-        const innerObservable = Rx.Observable.interval(500).take(5)
-        return innerObservable
+        console.log('clicked, unsubscribe previous innerObservable')
+        prevInnerObservable_subscription && prevInnerObservable_subscription.unsubscribe()
+
+        const innerObservable$ = Rx.Observable.interval(500).take(5)
+        return innerObservable$
       })
 
+
     const observer = {
-      next: innerObservable => {
-        const innerObserver = {
-          next: tick=>console.log(tick),
-          error: err=>{},
-          complete: ()=>console.log('innerObservable complete')
+      next: innerObservable$ => {
+        const observer_inner = {
+          next    : innerObservable$value=>console.log(innerObservable$value),
+          error   : err =>{},
+          complete: ()  =>console.log('innerObservable$ completed')
         }
-        ref_innerObservable_subscription = innerObservable.subscribe(innerObserver)
+        prevInnerObservable_subscription = innerObservable$.subscribe(observer_inner)
       },
-      error: err=>{} ,
-      complete: () => {console.log('complete')} /// this never called
+      error   : err=>{} ,
+      complete: () => {console.log('firstOrder$ complete after 4 clicks')}
+
     }
 
-    secondOrder.subscribe( observer )
+    secondOrder$$.subscribe( observer )
 
   </script>
 </body>
